@@ -35,4 +35,5 @@ dependencies {
     compile "com.google.dagger:dagger:$rootProject.ext.daggerVersion"
     compile "com.jakewharton:butterknife:$rootProject.ext.butterknifeVersion"
     compile "org.greenrobot:eventbus:$rootProject.ext.eventbusVersion"
+    compile "com.google.android.gms:play-services-location:$rootProject.ext.playServicesLocationVersion"
 }
