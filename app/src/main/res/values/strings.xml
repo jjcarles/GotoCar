@@ -1,9 +1,5 @@
 <resources>
     <string name="app_name">GotoCar</string>
-    <string name="go_to">Go to</string>
-    <string name="load">Load</string>
-    <string name="save">Save</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="savepoi_title_details">Detalles</string>
+    <string name="savepoi_title_map">Mapa</string>
 </resources>
