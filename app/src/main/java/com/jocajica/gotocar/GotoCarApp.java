@@ -21,7 +21,7 @@ public class GotoCarApp extends Application {
 
     private void initModules() {
         gotoCarModule = new GotoCarAppModule(this);
-        domainModule = new DomainModule()
+        domainModule = new DomainModule();
     }
 
     public String getSharedPreferencesName() {
