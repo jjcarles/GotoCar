@@ -17,6 +17,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -33,18 +35,12 @@ import butterknife.ButterKnife;
 
 public class SavePoiActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    @BindView(R.id.appbar)
-    AppBarLayout appbar;
-    @BindView(R.id.viewPager)
-    ViewPager viewPager;
-    @BindView(R.id.fab)
-    FloatingActionButton fab;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.tabs)
     TabLayout tabLayout;
-    @BindView(R.id.main_content)
-    CoordinatorLayout mainContent;
+    @BindView(R.id.viewPager)
+    ViewPager viewPager;
 
     @Inject
     SavePoiPresenter presenter;
@@ -53,6 +49,7 @@ public class SavePoiActivity extends AppCompatActivity implements GoogleApiClien
     @Inject
     SharedPreferences sharedPreferences;
 
+    private GotoCarApp app;
     private Location lastLocation;
     private GoogleApiClient googleApiClient;
 
@@ -62,6 +59,8 @@ public class SavePoiActivity extends AppCompatActivity implements GoogleApiClien
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_savepoi);
         ButterKnife.bind(this);
+
+        app = (GotoCarApp)getApplication();
 
         setupInjection();
         setupNavigation();
@@ -79,8 +78,20 @@ public class SavePoiActivity extends AppCompatActivity implements GoogleApiClien
 
     @Override
     protected void onStart() {
-        googleApiClient.connect();
         super.onStart();
+        googleApiClient.connect();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_savepoi, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Open shared preferences
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

@@ -46,6 +46,6 @@
         android:layout_margin="@dimen/fab_margin"
         android:tint="@android:color/white"
         app:backgroundTint="@color/colorPrimaryDark"
-        android:src="@android:drawable/ic_menu_camera" />
+        android:src="@android:drawable/ic_menu_save" />
 
 </android.support.design.widget.CoordinatorLayout>

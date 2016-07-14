@@ -9,6 +9,8 @@ public interface SavePoiPresenter {
     void onCreate();
     void onDestroy();
 
+    void settings();
+
     void subscribe();
     void unsubscribe();
 
