@@ -17,7 +17,7 @@ import dagger.Provides;
 public class DomainModule {
     @Provides
     @Singleton
-    Util providerUtil(Geocoder geocoder) {
+    Util providesUtil(Geocoder geocoder) {
         return new Util(geocoder);
     }
 
