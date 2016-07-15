@@ -4,4 +4,7 @@
     <string name="savepoi.title.map">Mapa</string>
     <string name="savepoi.menu.action.settings">Configuracion</string>
     <string name="savepoi.error.location.notavailable">Imposible obtener ubicación</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

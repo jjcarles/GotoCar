@@ -28,8 +28,11 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.jocajica.gotocar.GotoCarApp;
+import com.jocajica.gotocar.PoiInfoFragment;
+import com.jocajica.gotocar.PoiMapFragment;
 import com.jocajica.gotocar.R;
 import com.jocajica.gotocar.savepoi.SavePoiPresenter;
+import com.jocajica.gotocar.savepoi.events.SavePoiEvent;
 import com.jocajica.gotocar.savepoi.ui.adapters.SavePoiSectionsPagerAdapter;
 
 import javax.inject.Inject;
@@ -132,11 +135,44 @@ public class SavePoiActivity extends AppCompatActivity implements GoogleApiClien
                 getString(R.string.savepoi_title_details),
                 getString(R.string.savepoi_title_map)};
 
-        Fragment[] fragments = new Fragment[]{new PhotoListFragment(),
-                new PhotoMapFragment()};
+        Fragment[] fragments = new Fragment[]{
+                new PoiInfoFragment(),
+                new PoiMapFragment()};
 
-        GotoCarApp app = (GotoCarApp) getApplication();
-        app.getMainComponent(this, getSupportFragmentManager(), fragments, titles).inject(this);
+        adapter = new SavePoiSectionsPagerAdapter(getSupportFragmentManager(), fragments, titles);
+        sharedPreferences = getSharedPreferences(app.getSharedPreferencesName(), MODE_PRIVATE);
+
+        presenter = new SavePoiPresenter() {
+            @Override
+            public void onCreate() {
+
+            }
+
+            @Override
+            public void onDestroy() {
+
+            }
+
+            @Override
+            public void settings() {
+
+            }
+
+            @Override
+            public void subscribe() {
+
+            }
+
+            @Override
+            public void unsubscribe() {
+
+            }
+
+            @Override
+            public void onEventMainThread(SavePoiEvent event) {
+
+            }
+        };
     }
 
     @Override
@@ -154,6 +190,7 @@ public class SavePoiActivity extends AppCompatActivity implements GoogleApiClien
 
         if (LocationServices.FusedLocationApi.getLocationAvailability(googleApiClient).isLocationAvailable()) {
             lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+            Snackbar.make(viewPager, lastLocation.toString(), Snackbar.LENGTH_SHORT).show();
         }
         else {
             Snackbar.make(viewPager, R.string.savepoi_error_location_notavailable, Snackbar.LENGTH_SHORT).show();
