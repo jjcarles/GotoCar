@@ -1,9 +1,12 @@
 package com.jocajica.gotocar.savepoi.ui;
 
 import android.Manifest;
+import android.content.Intent;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -21,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.jocajica.gotocar.GotoCarApp;
@@ -34,6 +38,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class SavePoiActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+
+    private static final int REQUEST_RESOLVE_ERROR = 0;
+    private static final int PERMISSIONS_REQUEST_LOCATION = 1;
+
+    private boolean resolvingError = false;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -60,7 +69,7 @@ public class SavePoiActivity extends AppCompatActivity implements GoogleApiClien
         setContentView(R.layout.activity_savepoi);
         ButterKnife.bind(this);
 
-        app = (GotoCarApp)getApplication();
+        app = (GotoCarApp) getApplication();
 
         setupInjection();
         setupNavigation();
@@ -123,7 +132,7 @@ public class SavePoiActivity extends AppCompatActivity implements GoogleApiClien
                 getString(R.string.savepoi_title_details),
                 getString(R.string.savepoi_title_map)};
 
-        Fragment[] fragments = new Fragment[]{ new PhotoListFragment(),
+        Fragment[] fragments = new Fragment[]{new PhotoListFragment(),
                 new PhotoMapFragment()};
 
         GotoCarApp app = (GotoCarApp) getApplication();
@@ -133,11 +142,48 @@ public class SavePoiActivity extends AppCompatActivity implements GoogleApiClien
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            lastLocation = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                }, PERMISSIONS_REQUEST_LOCATION);
+            }
+
             return;
         }
 
-        lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+        if (LocationServices.FusedLocationApi.getLocationAvailability(googleApiClient).isLocationAvailable()) {
+            lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+        }
+        else {
+            Snackbar.make(viewPager, R.string.savepoi_error_location_notavailable, Snackbar.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_LOCATION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        // TODO: Consider calling
+                        //    ActivityCompat#requestPermissions
+                        // here to request the missing permissions, and then overriding
+                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                        //                                          int[] grantResults)
+                        // to handle the case where the user grants the permission. See the documentation
+                        // for ActivityCompat#requestPermissions for more details.
+                        return;
+                    }
+                    if (LocationServices.FusedLocationApi.getLocationAvailability(googleApiClient).isLocationAvailable()) {
+                        lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+                    }
+                    else {
+                        Snackbar.make(viewPager, R.string.savepoi_error_location_notavailable, Snackbar.LENGTH_SHORT).show();
+                    }
+                }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
@@ -147,6 +193,36 @@ public class SavePoiActivity extends AppCompatActivity implements GoogleApiClien
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Snackbar.make(viewPager, connectionResult.getErrorMessage(), Snackbar.LENGTH_SHORT).show();
+        if (resolvingError) {
+            return;
+        }
+        else if (connectionResult.hasResolution()) {
+            resolvingError = true;
+            try {
+                connectionResult.startResolutionForResult(this, REQUEST_RESOLVE_ERROR);
+            } catch (IntentSender.SendIntentException e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            resolvingError = true;
+            GoogleApiAvailability.getInstance().getErrorDialog(this, connectionResult.getErrorCode(), REQUEST_RESOLVE_ERROR).show();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == REQUEST_RESOLVE_ERROR) {
+            resolvingError = false;
+
+            if (resultCode == RESULT_OK) {
+                if (!googleApiClient.isConnecting() && !googleApiClient.isConnected()) {
+                    googleApiClient.connect();
+                }
+
+            }
+        }
     }
 }
